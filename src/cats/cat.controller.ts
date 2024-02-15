@@ -3,18 +3,16 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
   Post,
   Put,
   Query,
+  Res,
 } from '@nestjs/common';
 import { Observable, of } from 'rxjs';
-import {
-  Cats,
-  CreateCatDto,
-  ListAllEntities,
-  updateCatDto,
-} from './create-cat.dto';
+import { Cats, CreateCatDto, ListAllEntities } from './create-cat.dto';
+import { Response } from 'express';
 
 @Controller('cats')
 export class CatsController {
@@ -27,12 +25,22 @@ export class CatsController {
     return `This action adds a new cat ${catProps.age}`;
   }
   @Get('test-query')
-  findAll(@Query() query: ListAllEntities): string {
-    return `This action returns all cat(limit: ${query.limit}) items`;
+  findAll(
+    @Query() query: ListAllEntities,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    res.setHeader('X-Custom-Header', 'Hello, NestJS!');
+    res.cookie('myCookie', 'NestJS is awesome!');
+    // res.status(HttpStatus.OK).json({
+    //   data: ['cat1', 'cat2'],
+    //   title: 'Data response successfully',
+    // });
+    return { message: 'Response modified successfully.' };
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string, @Res() res: Response) {
+    res.status(HttpStatus.CREATED).send('Create cat successfully');
     return `This action get will returns a id=${id} cat`;
   }
   @Put(':id')

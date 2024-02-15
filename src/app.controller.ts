@@ -53,6 +53,6 @@ export class testController {
   @Post('post')
   @HttpCode(300)
   postCat(): void {
-    console.log('post for cat');
+    console.log('post for catf');
   }
 }
