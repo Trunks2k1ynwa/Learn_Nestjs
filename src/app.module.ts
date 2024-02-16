@@ -6,7 +6,7 @@ import { HumansModule } from './humans/human.module';
 
 @Module({
   imports: [CatsModule, HumansModule],
-  controllers: [AppController],
+  controllers: [AppController, testController],
   providers: [AppService],
 })
 export class AppModule {}
