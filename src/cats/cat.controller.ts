@@ -3,8 +3,10 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Query,
@@ -14,6 +16,7 @@ import { Observable, of } from 'rxjs';
 import { CreateCatDto, ListAllEntities } from './dto/create-cat.dto';
 import { Response } from 'express';
 import { CatsService } from './cat.service';
+import { ForbiddenException } from 'src/forbidden.exception';
 
 @Controller('cats')
 export class CatsController {
@@ -21,7 +24,11 @@ export class CatsController {
 
   @Get('get-cats')
   findAllCat(): Observable<string[]> {
-    return of(['cat black', 'cat white']);
+    try {
+      return of(['cat black', 'cat white']);
+    } catch (error) {
+      throw new ForbiddenException();
+    }
   }
   @Post('test-dto')
   async create(@Body() catProps: CreateCatDto) {
@@ -47,10 +54,13 @@ export class CatsController {
     return `This action get will returns a id=${id} cat`;
   }
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateCatDto: CreateCatDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateCatDto: CreateCatDto,
+  ) {
     return {
       title: `This action updates a id=${id} cat with name ${updateCatDto.name}`,
-      content: this.catsService.updateCat(parseInt(id)),
+      content: this.catsService.updateCat(id),
     };
   }
 

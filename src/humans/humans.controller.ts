@@ -14,11 +14,10 @@ export class HumansController {
   @Post()
   async create(@Body() humanDto: HumanDto) {
     this.humansService.createHuman(humanDto);
-    console.log(this.catsService.findAllCat());
     return 'Add human successfully';
   }
 
-  @Get()
+  @Get('get-all')
   async findAll(): Promise<Humans[]> {
     return this.humansService.findAllHuman();
   }
