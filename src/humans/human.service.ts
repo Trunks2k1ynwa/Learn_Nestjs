@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { Humans } from 'src/interfaces/human.interface';
+import { Humans } from 'src/humans/interfaces/human.interface';
 
 @Injectable()
 export class HumansService {
   protected readonly humans: Humans[] = [];
 
-  createHuman(cat: Humans) {
-    this.humans.push(cat);
+  createHuman(human: Humans) {
+    this.humans.push(human);
   }
 
   findAllHuman(): Humans[] {

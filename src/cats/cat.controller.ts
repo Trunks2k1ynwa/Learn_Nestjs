@@ -11,11 +11,14 @@ import {
   Res,
 } from '@nestjs/common';
 import { Observable, of } from 'rxjs';
-import { Cats, CreateCatDto, ListAllEntities } from './create-cat.dto';
+import { CreateCatDto, ListAllEntities } from './dto/create-cat.dto';
 import { Response } from 'express';
+import { CatsService } from './cat.service';
 
 @Controller('cats')
 export class CatsController {
+  constructor(private catsService: CatsService) {}
+
   @Get('get-cats')
   findAllCat(): Observable<string[]> {
     return of(['cat black', 'cat white']);
@@ -44,11 +47,10 @@ export class CatsController {
     return `This action get will returns a id=${id} cat`;
   }
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateCatDto: Cats) {
-    const listCat = new Cats();
+  update(@Param('id') id: string, @Body() updateCatDto: CreateCatDto) {
     return {
       title: `This action updates a id=${id} cat with name ${updateCatDto.name}`,
-      content: listCat.updateCat(parseInt(id)),
+      content: this.catsService.updateCat(parseInt(id)),
     };
   }
 
