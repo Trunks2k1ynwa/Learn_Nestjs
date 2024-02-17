@@ -5,21 +5,28 @@ import {
   Get,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Query,
   Res,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Observable, of } from 'rxjs';
 import { CreateCatDto, ListAllEntities } from './dto/create-cat.dto';
 import { Response } from 'express';
 import { CatsService } from './cat.service';
+// import { RolesGuard } from 'src/guard/role.guard';
+import { Roles } from 'src/roles.decorator';
+import { LoggingInterceptor } from 'src/logging.interceptor';
 
 @Controller('cats')
+@UseInterceptors(LoggingInterceptor)
 export class CatsController {
   constructor(private catsService: CatsService) {}
 
   @Get('get-cats')
+  // @UseGuards(new RolesGuard())
   findAllCat(): Observable<string[]> {
     return of(['cat black', 'cat white']);
   }
@@ -47,10 +54,18 @@ export class CatsController {
     return `This action get will returns a id=${id} cat`;
   }
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateCatDto: CreateCatDto) {
+  @Roles(['admin'])
+  update(
+    @Param(
+      'id',
+      new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    id: number,
+    @Body() updateCatDto: CreateCatDto,
+  ) {
     return {
       title: `This action updates a id=${id} cat with name ${updateCatDto.name}`,
-      content: this.catsService.updateCat(parseInt(id)),
+      content: this.catsService.updateCat(id),
     };
   }
 
