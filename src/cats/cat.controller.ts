@@ -19,15 +19,20 @@ import { CatsService } from './cat.service';
 // import { RolesGuard } from 'src/guard/role.guard';
 import { Roles } from 'src/roles.decorator';
 import { LoggingInterceptor } from 'src/logging.interceptor';
-
+import { ConfigService } from '@nestjs/config';
 @Controller('cats')
 @UseInterceptors(LoggingInterceptor)
 export class CatsController {
-  constructor(private catsService: CatsService) {}
+  constructor(
+    private catsService: CatsService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Get('get-cats')
   // @UseGuards(new RolesGuard())
   findAllCat(): Observable<string[]> {
+    const dbUser = this.configService.get<string>('DATABASE_USER');
+    console.log('🚀 ~ dbUser:', dbUser);
     return of(['cat black', 'cat white']);
   }
   @Post('test-dto')
