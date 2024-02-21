@@ -12,7 +12,6 @@ import {
   Res,
   UseInterceptors,
 } from '@nestjs/common';
-import { Observable, of } from 'rxjs';
 import { CreateCatDto, ListAllEntities } from './dto/create-cat.dto';
 import { Response } from 'express';
 import { CatsService } from './cat.service';
@@ -20,20 +19,23 @@ import { CatsService } from './cat.service';
 import { Roles } from 'src/roles.decorator';
 import { LoggingInterceptor } from 'src/logging.interceptor';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Cats } from 'src/cat.entity';
 @Controller('cats')
 @UseInterceptors(LoggingInterceptor)
 export class CatsController {
   constructor(
     private catsService: CatsService,
     private readonly configService: ConfigService,
+    @InjectRepository(Cats)
+    private catsRepository: Repository<Cats>,
   ) {}
 
-  @Get('get-cats')
+  @Get('get-all-cats')
   // @UseGuards(new RolesGuard())
-  findAllCat(): Observable<string[]> {
-    const dbUser = this.configService.get<string>('DATABASE_USER');
-    console.log('🚀 ~ dbUser:', dbUser);
-    return of(['cat black', 'cat white']);
+  async findAllCat() {
+    return await this.catsRepository.find();
   }
   @Post('test-dto')
   async create(@Body() catProps: CreateCatDto) {
