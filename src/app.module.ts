@@ -7,22 +7,31 @@ import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './guard/role.guard';
 import { CommonModule } from './common/common.module';
 import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Cats } from './cat.entity';
+import { DataSource } from 'typeorm';
 @Module({
   imports: [
     CatsModule,
     HumansModule,
     CommonModule,
     ConfigModule.forRoot(),
-    // TypeOrmModule.forRoot({
-    //   type: 'mysql',
-    //   host: 'localhost',
-    //   port: 3306,
-    //   username: 'root',
-    //   password: 'root',
-    //   database: 'test',
-    //   entities: [User],
-    //   synchronize: true,
-    //   autoLoadEntities: true,
+    TypeOrmModule.forRoot({
+      type: 'mysql',
+      host: 'localhost',
+      port: 3306,
+      username: 'root',
+      password: 'Trung2001@',
+      database: 'natours',
+      entities: [Cats],
+      synchronize: true,
+      autoLoadEntities: true,
+    }),
+    // MongooseModule.forRoot('mongodb://localhost/test', {
+    //   connectionName: 'cats',
+    // }),
+    // MongooseModule.forRoot('mongodb://localhost/users', {
+    //   connectionName: 'users',
     // }),
   ],
 
@@ -35,4 +44,6 @@ import { ConfigModule } from '@nestjs/config';
     },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(private dataSource: DataSource) {}
+}
