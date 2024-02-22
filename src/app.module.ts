@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Inject, Module } from '@nestjs/common';
 import { AppController, testController } from './app.controller';
 import { AppService } from './app.service';
 import { CatsModule } from './cats/cats.module';
@@ -6,33 +6,34 @@ import { HumansModule } from './humans/human.module';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './guard/role.guard';
 import { CommonModule } from './common/common.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Cats } from './cat.entity';
 import { DataSource } from 'typeorm';
+import { Cats } from './entities/cat.entity';
+import { User } from './entities/user.entity';
 @Module({
   imports: [
     CatsModule,
     HumansModule,
     CommonModule,
-    ConfigModule.forRoot(),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: 'Trung2001@',
-      database: 'natours',
-      entities: [Cats],
-      synchronize: true,
-      autoLoadEntities: true,
+    ConfigModule.forRoot({
+      envFilePath: ['.env.development'],
     }),
-    // MongooseModule.forRoot('mongodb://localhost/test', {
-    //   connectionName: 'cats',
-    // }),
-    // MongooseModule.forRoot('mongodb://localhost/users', {
-    //   connectionName: 'users',
-    // }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: 'mysql',
+        host: configService.get('DB_HOST'),
+        port: configService.get('DB_PORT'),
+        username: configService.get('DB_USERNAME'),
+        password: configService.get('DB_PASSWORD'),
+        database: configService.get('DB_DATABASE'),
+        entities: [Cats, User],
+        synchronize: true,
+        autoLoadEntities: true,
+      }),
+      inject: [ConfigService],
+    }),
   ],
 
   controllers: [AppController, testController],
