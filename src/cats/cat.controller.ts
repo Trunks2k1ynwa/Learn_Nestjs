@@ -11,24 +11,32 @@ import {
   Put,
   Query,
   Res,
+  UseInterceptors,
 } from '@nestjs/common';
-import { Observable, of } from 'rxjs';
 import { CreateCatDto, ListAllEntities } from './dto/create-cat.dto';
 import { Response } from 'express';
 import { CatsService } from './cat.service';
-import { ForbiddenException } from 'src/forbidden.exception';
-
+// import { RolesGuard } from 'src/guard/role.guard';
+import { Roles } from 'src/roles.decorator';
+import { LoggingInterceptor } from 'src/logging.interceptor';
+import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Cats } from 'src/cat.entity';
 @Controller('cats')
+@UseInterceptors(LoggingInterceptor)
 export class CatsController {
-  constructor(private catsService: CatsService) {}
+  constructor(
+    private catsService: CatsService,
+    private readonly configService: ConfigService,
+    @InjectRepository(Cats)
+    private catsRepository: Repository<Cats>,
+  ) {}
 
-  @Get('get-cats')
-  findAllCat(): Observable<string[]> {
-    try {
-      return of(['cat black', 'cat white']);
-    } catch (error) {
-      throw new ForbiddenException();
-    }
+  @Get('get-all-cats')
+  // @UseGuards(new RolesGuard())
+  async findAllCat() {
+    return await this.catsRepository.find();
   }
   @Post('test-dto')
   async create(@Body() catProps: CreateCatDto) {
@@ -54,8 +62,13 @@ export class CatsController {
     return `This action get will returns a id=${id} cat`;
   }
   @Put(':id')
+  @Roles(['admin'])
   update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param(
+      'id',
+      new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    id: number,
     @Body() updateCatDto: CreateCatDto,
   ) {
     return {
