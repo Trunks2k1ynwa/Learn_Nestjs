@@ -3,7 +3,7 @@ import { CatsController } from './cat.controller';
 import { CatsService } from './cat.service';
 import { CommonModule } from 'src/common/common.module';
 import { ConfigModule } from '@nestjs/config';
-import { Cats } from 'src/cat.entity';
+import { Cats } from 'src/entities/cat.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 // @Global()
 @Module({

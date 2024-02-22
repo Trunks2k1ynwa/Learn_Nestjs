@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  HttpException,
   HttpStatus,
   Param,
   ParseIntPipe,
@@ -16,31 +15,27 @@ import {
 import { CreateCatDto, ListAllEntities } from './dto/create-cat.dto';
 import { Response } from 'express';
 import { CatsService } from './cat.service';
-// import { RolesGuard } from 'src/guard/role.guard';
 import { Roles } from 'src/roles.decorator';
 import { LoggingInterceptor } from 'src/logging.interceptor';
-import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Cats } from 'src/cat.entity';
+import { Cats } from 'src/entities/cat.entity';
 @Controller('cats')
 @UseInterceptors(LoggingInterceptor)
 export class CatsController {
   constructor(
     private catsService: CatsService,
-    private readonly configService: ConfigService,
     @InjectRepository(Cats)
     private catsRepository: Repository<Cats>,
   ) {}
 
   @Get('get-all-cats')
-  // @UseGuards(new RolesGuard())
   async findAllCat() {
     return await this.catsRepository.find();
   }
   @Post('test-dto')
   async create(@Body() catProps: CreateCatDto) {
-    return `This action adds a new cat ${catProps.age}`;
+    return `This action adds a new cat ${catProps.number}`;
   }
   @Get('test-query')
   findAll(
@@ -49,10 +44,6 @@ export class CatsController {
   ) {
     res.setHeader('X-Custom-Header', 'Hello, NestJS!');
     res.cookie('myCookie', 'NestJS is awesome!');
-    // res.status(HttpStatus.OK).json({
-    //   data: ['cat1', 'cat2'],
-    //   title: 'Data response successfully',
-    // });
     return { message: 'Response modified successfully.' };
   }
 
@@ -80,5 +71,10 @@ export class CatsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return `This action removes a id=${id} cat`;
+  }
+  //CRUD
+  @Post('create-cat')
+  createCat(@Body() catProp: CreateCatDto) {
+    return this.catsService.createCat(catProp);
   }
 }

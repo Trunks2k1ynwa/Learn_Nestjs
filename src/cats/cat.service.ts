@@ -1,9 +1,11 @@
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
-import { ICatProp } from './dto/create-cat.dto';
+import { CreateCatDto, ICatProp } from './dto/create-cat.dto';
 import { CommonService } from 'src/common/common.service';
 import { LazyModuleLoader } from '@nestjs/core';
 import { HumansController } from 'src/humans/humans.controller';
-
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Cats } from 'src/entities/cat.entity';
 @Injectable()
 export class CatsService {
   private service: HumansController;
@@ -22,6 +24,8 @@ export class CatsService {
     @Inject(forwardRef(() => CommonService))
     private commonService: CommonService,
     private lazyModuleLoader: LazyModuleLoader,
+    @InjectRepository(Cats)
+    private catsRepository: Repository<Cats>,
   ) {}
 
   updateCat(idCat: number) {
@@ -31,5 +35,9 @@ export class CatsService {
   }
   findAllCat(): ICatProp[] {
     return this.listCat;
+  }
+  //CRUD
+  createCat(cat: CreateCatDto) {
+    this.catsRepository.create(cat);
   }
 }

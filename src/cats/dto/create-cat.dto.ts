@@ -1,8 +1,8 @@
 export class CreateCatDto {
-  id: number;
+  catId: number;
   name: string;
-  age: number;
-  breed: string;
+  color: string;
+  number: number;
 }
 
 export class ListAllEntities {
