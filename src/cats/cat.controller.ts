@@ -16,7 +16,7 @@ import { CreateCatDto, ListAllEntities } from './dto/create-cat.dto';
 import { Response } from 'express';
 import { CatsService } from './cat.service';
 import { Roles } from 'src/roles.decorator';
-import { LoggingInterceptor } from 'src/logging.interceptor';
+import { LoggingInterceptor } from 'src/interceptors/logging.interceptor';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cats } from 'src/entities/cat.entity';

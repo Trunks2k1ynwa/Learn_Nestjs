@@ -1,12 +1,15 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { HumansController } from './humans.controller';
 import { HumansService } from './human.service';
 import { CatsModule } from 'src/cats/cats.module';
-// import { TypeOrmModule } from '@nestjs/typeorm';
+import { LoggerMiddleware } from 'src/middlewares/logger.middleware';
 @Module({
   imports: [CatsModule],
   controllers: [HumansController],
   providers: [HumansService],
-  // exports: [TypeOrmModule],
 })
-export class HumansModule {}
+export class HumansModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
