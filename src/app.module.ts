@@ -11,6 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { Cats } from './entities/cat.entity';
 import { User } from './entities/user.entity';
+import databaseConfig from './config/database.config';
 @Module({
   imports: [
     CatsModule,
@@ -18,6 +19,8 @@ import { User } from './entities/user.entity';
     CommonModule,
     ConfigModule.forRoot({
       envFilePath: ['.env.development'],
+      load: [databaseConfig],
+      isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

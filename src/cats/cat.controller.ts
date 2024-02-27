@@ -20,6 +20,7 @@ import { LoggingInterceptor } from 'src/interceptors/logging.interceptor';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cats } from 'src/entities/cat.entity';
+import { ConfigService } from '@nestjs/config';
 @Controller('cats')
 @UseInterceptors(LoggingInterceptor)
 export class CatsController {
@@ -27,10 +28,12 @@ export class CatsController {
     private catsService: CatsService,
     @InjectRepository(Cats)
     private catsRepository: Repository<Cats>,
+    private configService: ConfigService,
   ) {}
 
   @Get('get-all-cats')
   async findAllCat() {
+    console.log('config', this.configService.get<string>('database.host'));
     return await this.catsRepository.find();
   }
   @Post('test-dto')
