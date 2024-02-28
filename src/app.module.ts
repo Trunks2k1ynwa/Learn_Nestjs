@@ -1,4 +1,4 @@
-import { Inject, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController, testController } from './app.controller';
 import { AppService } from './app.service';
 import { CatsModule } from './cats/cats.module';
@@ -21,6 +21,7 @@ import databaseConfig from './config/database.config';
       envFilePath: ['.env.development'],
       load: [databaseConfig],
       isGlobal: true,
+      cache: true,
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

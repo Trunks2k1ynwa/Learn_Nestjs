@@ -36,10 +36,12 @@ export class CatsController {
     console.log('config', this.configService.get<string>('database.host'));
     return await this.catsRepository.find();
   }
+
   @Post('test-dto')
   async create(@Body() catProps: CreateCatDto) {
     return `This action adds a new cat ${catProps.number}`;
   }
+
   @Get('test-query')
   findAll(
     @Query() query: ListAllEntities,
