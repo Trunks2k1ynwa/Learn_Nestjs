@@ -19,8 +19,8 @@ import databaseConfig from './config/database.config';
     CommonModule,
     ConfigModule.forRoot({
       envFilePath: ['.env.development'],
-      load: [databaseConfig],
-      isGlobal: true,
+      load: [databaseConfig], //Load one or more config that have value of env
+      isGlobal: true, // All module can use this config
       cache: true,
     }),
     TypeOrmModule.forRootAsync({

@@ -30,6 +30,16 @@ export class CatsController {
     private catsRepository: Repository<Cats>,
     private configService: ConfigService,
   ) {}
+  @Get('test-env')
+  getEnvCat() {
+    const test_env = this.configService.get<string>('cat.test_env');
+    const cat_port = this.configService.get<number>('cat.port_cat');
+    if (!test_env && !cat_port) return 'Not find value from env file';
+    return {
+      env: test_env,
+      port: cat_port,
+    };
+  }
 
   @Get('get-all-cats')
   async findAllCat() {
