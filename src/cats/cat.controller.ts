@@ -20,6 +20,7 @@ import { LoggingInterceptor } from 'src/interceptors/logging.interceptor';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cats } from 'src/entities/cat.entity';
+import { ConfigService } from '@nestjs/config';
 @Controller('cats')
 @UseInterceptors(LoggingInterceptor)
 export class CatsController {
@@ -27,16 +28,30 @@ export class CatsController {
     private catsService: CatsService,
     @InjectRepository(Cats)
     private catsRepository: Repository<Cats>,
+    private configService: ConfigService,
   ) {}
+  @Get('test-env')
+  getEnvCat() {
+    const test_env = this.configService.get<string>('cat.test_env');
+    const cat_port = this.configService.get<number>('cat.port_cat');
+    if (!test_env && !cat_port) return 'Not find value from env file';
+    return {
+      env: test_env,
+      port: cat_port,
+    };
+  }
 
   @Get('get-all-cats')
   async findAllCat() {
+    console.log('config', this.configService.get<string>('database.host'));
     return await this.catsRepository.find();
   }
+
   @Post('test-dto')
   async create(@Body() catProps: CreateCatDto) {
     return `This action adds a new cat ${catProps.number}`;
   }
+
   @Get('test-query')
   findAll(
     @Query() query: ListAllEntities,

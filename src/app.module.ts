@@ -1,4 +1,4 @@
-import { Inject, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController, testController } from './app.controller';
 import { AppService } from './app.service';
 import { CatsModule } from './cats/cats.module';
@@ -11,6 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { Cats } from './entities/cat.entity';
 import { User } from './entities/user.entity';
+import databaseConfig from './config/database.config';
 @Module({
   imports: [
     CatsModule,
@@ -18,6 +19,9 @@ import { User } from './entities/user.entity';
     CommonModule,
     ConfigModule.forRoot({
       envFilePath: ['.env.development'],
+      load: [databaseConfig], //Load one or more config that have value of env
+      isGlobal: true, // All module can use this config
+      cache: true,
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
