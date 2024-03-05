@@ -17,17 +17,13 @@ import { Response } from 'express';
 import { CatsService } from './cat.service';
 import { Roles } from 'src/roles.decorator';
 import { LoggingInterceptor } from 'src/interceptors/logging.interceptor';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Cats } from 'src/entities/cat.entity';
 import { ConfigService } from '@nestjs/config';
 @Controller('cats')
 @UseInterceptors(LoggingInterceptor)
 export class CatsController {
   constructor(
     private catsService: CatsService,
-    @InjectRepository(Cats)
-    private catsRepository: Repository<Cats>,
+
     private configService: ConfigService,
   ) {}
   @Get('test-env')
@@ -42,9 +38,9 @@ export class CatsController {
   }
 
   @Get('get-all-cats')
-  async findAllCat() {
+  findAllCat() {
     console.log('config', this.configService.get<string>('database.host'));
-    return await this.catsRepository.find();
+    return this.catsService.findAllCat();
   }
 
   @Post('test-dto')

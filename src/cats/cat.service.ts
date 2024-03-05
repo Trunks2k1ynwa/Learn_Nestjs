@@ -38,6 +38,8 @@ export class CatsService {
   }
   //CRUD
   createCat(cat: CreateCatDto) {
-    this.catsRepository.create(cat);
+    const cats = this.catsRepository.create(cat);
+    this.catsRepository.save(cats);
+    return cats;
   }
 }
