@@ -37,12 +37,6 @@ export class CatsController {
     };
   }
 
-  @Get('get-all-cats')
-  findAllCat() {
-    console.log('config', this.configService.get<string>('database.host'));
-    return this.catsService.findAllCat();
-  }
-
   @Post('test-dto')
   async create(@Body() catProps: CreateCatDto) {
     return `This action adds a new cat ${catProps.number}`;
@@ -62,6 +56,11 @@ export class CatsController {
   findOne(@Param('id') id: string, @Res() res: Response) {
     res.status(HttpStatus.CREATED).send('Create cat successfully');
     return `This action get will returns a id=${id} cat`;
+  }
+  @Get('get-all-cats')
+  findAllCat() {
+    console.log('config', this.configService.get<string>('database.host'));
+    return this.catsService.findAllCat();
   }
   @Put(':id')
   @Roles(['admin'])

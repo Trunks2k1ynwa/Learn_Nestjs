@@ -11,9 +11,18 @@ export class AccountService {
     private accountRepository: Repository<Account>,
   ) {}
   async createAccount(createAccount: CreateAccountDto) {
-    console.log('🚀 ~ createAccount:', createAccount);
     const account = this.accountRepository.create(createAccount);
     await this.accountRepository.save(account);
     return account;
+  }
+  async getAllAccount(): Promise<Account[]> {
+    return await this.accountRepository.find();
+  }
+  async findAccount(accountId: number): Promise<Account> {
+    return await this.accountRepository.findOneBy({ id: accountId });
+  }
+  async updateAccount(accountId: number) {
+    const account = await this.accountRepository.findOneBy({ id: accountId });
+    await this.accountRepository.update(accountId, account);
   }
 }

@@ -9,19 +9,24 @@ import {
 } from '@nestjs/common';
 import { CreateAccountDto } from './dto/createAccount.dto';
 import { AccountService } from './account.service';
+import { Account } from 'src/entities/account.entity';
 
-@Controller('account')
+@Controller('accounts')
 export class AccountController {
   constructor(private accountService: AccountService) {}
-  @Post('create-account')
+  @Post()
   @UsePipes(new ValidationPipe({ transform: true }))
   createAccount(@Body() createAccount: CreateAccountDto) {
     return this.accountService.createAccount(createAccount);
   }
-  @UsePipes(new ValidationPipe({ transform: true }))
-  @Get(':id')
-  findOne(@Param('id') id: number) {
-    console.log(typeof id === 'number'); // true
-    return 'This action returns a user';
+  // Set globe so this line not needed
+  // @UsePipes(new ValidationPipe({ transform: true }))
+  @Get(':accountId')
+  findOne(@Param('accountId') accountId: number): Promise<Account> {
+    return this.accountService.findAccount(accountId);
+  }
+  @Get()
+  getAllAccount(): Promise<Account[]> {
+    return this.accountService.getAllAccount();
   }
 }
