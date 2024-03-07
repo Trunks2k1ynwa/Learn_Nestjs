@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   UsePipes,
   ValidationPipe,
@@ -10,6 +11,7 @@ import {
 import { CreateAccountDto } from './dto/createAccount.dto';
 import { AccountService } from './account.service';
 import { Account } from 'src/entities/account.entity';
+import { UpdateAccountDto } from './dto/updateAccount.dto';
 
 @Controller('accounts')
 export class AccountController {
@@ -19,6 +21,13 @@ export class AccountController {
   createAccount(@Body() createAccount: CreateAccountDto) {
     return this.accountService.createAccount(createAccount);
   }
+  @Patch(':accountId')
+  updateAccount(
+    @Param('accountId') accountId: number,
+    @Body() updateAccount: UpdateAccountDto,
+  ) {
+    return this.accountService.updateAccount(accountId, updateAccount);
+  }
   // Set globe so this line not needed
   // @UsePipes(new ValidationPipe({ transform: true }))
   @Get(':accountId')
@@ -26,7 +35,9 @@ export class AccountController {
     return this.accountService.findAccount(accountId);
   }
   @Get()
-  getAllAccount(): Promise<Account[]> {
+  // @CacheKey('accounts_key')
+  // @CacheTTL(120)
+  async getAllAccount() {
     return this.accountService.getAllAccount();
   }
 }
