@@ -17,9 +17,11 @@ export class AccountService {
   async createAccount(createAccount: CreateAccountDto) {
     const account = this.accountRepository.create(createAccount);
     await this.accountRepository.save(account);
+    this.cacheManager.del('accounts_key');
     return account;
   }
-  async getAllAccount() {
+
+  async getAllAccount(): Promise<{ dataFrom: string; data: Account[] }> {
     const cachedData: Account[] = await this.cacheManager.get('accounts_key');
     if (cachedData) {
       // Giá trị đã tồn tại trong cache
@@ -40,5 +42,10 @@ export class AccountService {
   }
   async updateAccount(accountId: number, dataUpdate: UpdateAccountDto) {
     await this.accountRepository.update(accountId, dataUpdate);
+  }
+  async deleteAccount(accountId: number) {
+    const account = await this.findAccount(accountId);
+    this.cacheManager.del('accounts_key');
+    return await this.accountRepository.remove(account);
   }
 }
