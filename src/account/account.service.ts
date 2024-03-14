@@ -6,6 +6,8 @@ import { Repository } from 'typeorm';
 import { UpdateAccountDto } from './dto/updateAccount.dto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 @Injectable()
 export class AccountService {
@@ -13,11 +15,36 @@ export class AccountService {
     @InjectRepository(Account)
     private accountRepository: Repository<Account>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @InjectQueue('test-queue') private audioQueue: Queue,
   ) {}
+  async findAllQueues() {
+    const accounts = await this.accountRepository.find();
+
+    await this.audioQueue.add(
+      'register',
+      { data: accounts },
+      {
+        priority: 1,
+        delay: 200,
+        removeOnFail: true,
+        removeOnComplete: true,
+      },
+    );
+    return accounts;
+  }
   async createAccount(createAccount: CreateAccountDto) {
     const account = this.accountRepository.create(createAccount);
     await this.accountRepository.save(account);
     this.cacheManager.del('accounts_key');
+    const job = await this.audioQueue.add(
+      {
+        delay: 3000,
+      },
+      {
+        priority: 2,
+      },
+    );
+    console.log('🚀 ~ job:', job);
     return account;
   }
 
@@ -32,6 +59,13 @@ export class AccountService {
     }
     const accounts = await this.accountRepository.find();
     await this.cacheManager.set('accounts_key', accounts, 0);
+
+    const value = await this.audioQueue.getJob('register');
+    if (value)
+      return {
+        dataFrom: 'From Queue',
+        data: value,
+      };
     return {
       dataFrom: 'From Database',
       data: accounts,

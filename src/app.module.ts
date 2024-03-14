@@ -12,6 +12,8 @@ import databaseConfig from './config/database.config';
 import { AccountModule } from './account/account.module';
 import { TypeOrmConfigService } from './config/database.service';
 import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
+import { BullModule } from '@nestjs/bull';
+import { AudioConsumer } from './account/consumers/audio.consumer';
 @Module({
   imports: [
     CatsModule,
@@ -44,6 +46,18 @@ import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
       // }),
       inject: [ConfigService],
     }),
+    //Module is use to config Queues
+    BullModule.forRootAsync('alternative-config', {
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        redis: {
+          port: configService.get('REDIS_PORT'),
+          host: configService.get('REDIS_HOST'),
+          password: configService.get('REDIS_PASSWORD'),
+        },
+      }),
+      inject: [ConfigService],
+    }),
   ],
 
   controllers: [AppController, testController],
@@ -57,6 +71,7 @@ import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
       provide: APP_INTERCEPTOR,
       useClass: CacheInterceptor,
     },
+    AudioConsumer,
   ],
 })
 export class AppModule {}

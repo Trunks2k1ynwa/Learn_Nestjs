@@ -20,6 +20,10 @@ import { UpdateAccountDto } from './dto/updateAccount.dto';
 @Controller('api/v1/accounts')
 export class AccountController {
   constructor(private accountService: AccountService) {}
+  @Get('queue')
+  testQueue() {
+    return this.accountService.findAllQueues();
+  }
   // Create new account
   @Post()
   @UsePipes(new ValidationPipe({ transform: true }))
