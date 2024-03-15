@@ -60,12 +60,6 @@ export class AccountService {
     const accounts = await this.accountRepository.find();
     await this.cacheManager.set('accounts_key', accounts, 0);
 
-    const value = await this.audioQueue.getJob('register');
-    if (value)
-      return {
-        dataFrom: 'From Queue',
-        data: value,
-      };
     return {
       dataFrom: 'From Database',
       data: accounts,
