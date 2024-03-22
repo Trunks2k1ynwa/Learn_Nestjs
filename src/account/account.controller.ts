@@ -7,6 +7,8 @@ import {
   Param,
   Patch,
   Post,
+  Req,
+  Res,
   SerializeOptions,
   UseInterceptors,
   UsePipes,
@@ -16,19 +18,21 @@ import { CreateAccountDto } from './dto/createAccount.dto';
 import { AccountService } from './account.service';
 import { Account } from 'src/entities/account.entity';
 import { UpdateAccountDto } from './dto/updateAccount.dto';
+import { Request, Response } from 'express';
+import { Cookies } from 'src/utils/cookies.decorator';
 
 @Controller('api/v1/accounts')
 export class AccountController {
   constructor(private accountService: AccountService) {}
   @Get('queue')
-  testQueue() {
+  testQueue(@Req() request: Request, @Cookies('token') name: string) {
+    console.log('cookies', name, request.cookies);
     return this.accountService.findAllQueues();
   }
   // Create new account
   @Post()
   @UsePipes(new ValidationPipe({ transform: true }))
   createAccount(@Body() createAccount: CreateAccountDto) {
-    console.log('🚀 ~ createAccount:', createAccount);
     return this.accountService.createAccount(createAccount);
   }
   // Update account by accountId
@@ -58,7 +62,12 @@ export class AccountController {
   @SerializeOptions({
     excludePrefixes: ['_'],
   })
-  async getAllAccount(): Promise<{ dataFrom: string; data: Account[] }> {
+  async getAllAccount(
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<{ dataFrom: string; data: Account[] }> {
+    response.cookie('token', 'asdfadsf32423432', {
+      secure: true,
+    });
     return this.accountService.getAllAccount();
   }
 }

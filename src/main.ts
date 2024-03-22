@@ -2,9 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: ['error', 'warn'],
+  });
   const configService = app.get(ConfigService);
   app.useGlobalPipes(
     new ValidationPipe({
@@ -15,7 +18,7 @@ async function bootstrap() {
   app.enableVersioning({
     type: VersioningType.URI,
   });
-
+  app.use(cookieParser());
   await app.listen(configService.get('PORT'));
 }
 bootstrap();

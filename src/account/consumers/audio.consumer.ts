@@ -20,7 +20,7 @@ export class AudioConsumer {
   @OnQueueActive()
   onActive(job: Job) {
     console.log(
-      `Processing job ${job.id} of type ${job.name} with data ${job.data.data}...`,
+      `OnQueueActive:  job ${job.id} of type ${job.name} with data ${job.data.data}...`,
     );
   }
 }

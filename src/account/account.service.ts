@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CreateAccountDto } from './dto/createAccount.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Account } from 'src/entities/account.entity';
@@ -11,15 +11,17 @@ import { Queue } from 'bull';
 
 @Injectable()
 export class AccountService {
+  logger: Logger;
   constructor(
     @InjectRepository(Account)
     private accountRepository: Repository<Account>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @InjectQueue('test-queue') private audioQueue: Queue,
-  ) {}
+  ) {
+    this.logger = new Logger(AccountService.name);
+  }
   async findAllQueues() {
     const accounts = await this.accountRepository.find();
-
     await this.audioQueue.add(
       'register',
       { data: accounts },
@@ -49,6 +51,7 @@ export class AccountService {
   }
 
   async getAllAccount(): Promise<{ dataFrom: string; data: Account[] }> {
+    this.logger.debug('logger all account');
     const cachedData: Account[] = await this.cacheManager.get('accounts_key');
     if (cachedData) {
       // Giá trị đã tồn tại trong cache
