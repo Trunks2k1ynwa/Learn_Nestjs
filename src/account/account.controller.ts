@@ -6,20 +6,18 @@ import {
   Get,
   Param,
   Patch,
-  Post,
   Req,
   Res,
   SerializeOptions,
   UseInterceptors,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
-import { CreateAccountDto } from './dto/createAccount.dto';
 import { AccountService } from './account.service';
 import { Account } from 'src/entities/account.entity';
 import { UpdateAccountDto } from './dto/updateAccount.dto';
 import { Request, Response } from 'express';
 import { Cookies } from 'src/utils/cookies.decorator';
+import { Roles } from 'src/utils/roles.decorator';
+import { Role } from 'src/utils/role.enum';
 
 @Controller('api/v1/accounts')
 export class AccountController {
@@ -29,12 +27,7 @@ export class AccountController {
     console.log('cookies', name, request.cookies);
     return this.accountService.findAllQueues();
   }
-  // Create new account
-  @Post()
-  @UsePipes(new ValidationPipe({ transform: true }))
-  createAccount(@Body() createAccount: CreateAccountDto) {
-    return this.accountService.createAccount(createAccount);
-  }
+
   // Update account by accountId
   @Patch(':accountId')
   updateAccount(
@@ -47,15 +40,18 @@ export class AccountController {
   // Get account by accountId
   @Get(':accountId')
   findOne(@Param('accountId') accountId: number): Promise<Account> {
-    return this.accountService.findAccount(accountId);
+    return this.accountService.findAccountById(accountId);
   }
   // Delete account by accountId
   @Delete(':accountId')
-  deleteOne(@Param('accountId') accountId: number) {
-    return this.accountService.deleteAccount(accountId);
+  @Roles(Role.Admin)
+  deleteOne(@Param('accountId') accountId: number, @Res() response: Response) {
+    return this.accountService.deleteAccount(accountId, response);
   }
   // Get all accounts
+  // @UseGuards(RolesGuard)
   @Get()
+  @Roles(Role.Admin)
   // @CacheKey('accounts_key')
   // @CacheTTL(120)
   @UseInterceptors(ClassSerializerInterceptor)
@@ -65,8 +61,9 @@ export class AccountController {
   async getAllAccount(
     @Res({ passthrough: true }) response: Response,
   ): Promise<{ dataFrom: string; data: Account[] }> {
-    response.cookie('token', 'asdfadsf32423432', {
-      secure: true,
+    response.cookie('token', 'Day la cookie le van trunk', {
+      // secure: true,
+      httpOnly: true,
     });
     return this.accountService.getAllAccount();
   }

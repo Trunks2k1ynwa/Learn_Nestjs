@@ -1,5 +1,4 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { CreateAccountDto } from './dto/createAccount.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Account } from 'src/entities/account.entity';
 import { Repository } from 'typeorm';
@@ -8,6 +7,8 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { Response } from 'express';
 
 @Injectable()
 export class AccountService {
@@ -17,10 +18,15 @@ export class AccountService {
     private accountRepository: Repository<Account>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @InjectQueue('test-queue') private audioQueue: Queue,
+    private eventEmitter: EventEmitter2,
   ) {
     this.logger = new Logger(AccountService.name);
   }
   async findAllQueues() {
+    this.eventEmitter.emit('order.created', {
+      value: 'eventEmitter',
+    });
+    this.logger.error('findAllQueues');
     const accounts = await this.accountRepository.find();
     await this.audioQueue.add(
       'register',
@@ -34,24 +40,13 @@ export class AccountService {
     );
     return accounts;
   }
-  async createAccount(createAccount: CreateAccountDto) {
-    const account = this.accountRepository.create(createAccount);
-    await this.accountRepository.save(account);
-    this.cacheManager.del('accounts_key');
-    const job = await this.audioQueue.add(
-      {
-        delay: 3000,
-      },
-      {
-        priority: 2,
-      },
-    );
-    console.log('🚀 ~ job:', job);
-    return account;
+  @OnEvent('order.created')
+  handleOrderCreatedEvent(payload: any) {
+    console.log('🚀 ~ payload:', payload);
+    // handle and process "OrderCreatedEvent" event
   }
 
   async getAllAccount(): Promise<{ dataFrom: string; data: Account[] }> {
-    this.logger.debug('logger all account');
     const cachedData: Account[] = await this.cacheManager.get('accounts_key');
     if (cachedData) {
       // Giá trị đã tồn tại trong cache
@@ -68,15 +63,33 @@ export class AccountService {
       data: accounts,
     };
   }
-  async findAccount(accountId: number): Promise<Account> {
+  async findAccountById(accountId: number): Promise<Account> {
     return await this.accountRepository.findOneBy({ id: accountId });
+  }
+  async findAccountByEmail(email: string): Promise<Account> {
+    return this.accountRepository.findOne({
+      where: { email },
+    });
   }
   async updateAccount(accountId: number, dataUpdate: UpdateAccountDto) {
     await this.accountRepository.update(accountId, dataUpdate);
+    return this.findAccountById(accountId);
   }
-  async deleteAccount(accountId: number) {
-    const account = await this.findAccount(accountId);
-    this.cacheManager.del('accounts_key');
-    return await this.accountRepository.remove(account);
+  async deleteAccount(accountId: number, response: Response) {
+    const account = await this.findAccountById(accountId);
+    if (!account) {
+      return response.status(400).json({
+        statusCode: 401,
+        message: `This account doesn't exist in the database`,
+      });
+    } else {
+      await this.accountRepository.remove(account);
+      return 'Delete account successfully';
+    }
+  }
+  async findAccountByUserName(username: string): Promise<Account> {
+    return this.accountRepository.findOne({
+      where: { username },
+    });
   }
 }

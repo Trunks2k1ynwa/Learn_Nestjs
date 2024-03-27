@@ -1,26 +1,27 @@
 import { Exclude, Expose, Transform } from 'class-transformer';
-import { Role } from 'src/enum/role.enum';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Role } from 'src/utils/role.enum';
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Account {
+  constructor(partial: Partial<Account>) {
+    Object.assign(this, partial);
+  }
   @PrimaryGeneratedColumn()
   id: number;
   @Column()
   @Transform(({ value }) => value.toUpperCase())
+  @Index({ unique: true })
   email: string;
-
+  @Column({ default: 'User Anonymous' })
+  username: string;
   @Column()
-  @Exclude()
+  @Exclude({ toPlainOnly: true })
   password: string;
-
-  @Column({ default: Role.USER })
-  role: string;
+  @Column({ default: Role.User })
+  role: Role;
   @Expose()
   get detailAccount(): string {
-    return `${this.id} ${this.password}`;
-  }
-  constructor(partial: Partial<Account>) {
-    Object.assign(this, partial);
+    return `${this.id} ${this.username}`;
   }
 }
