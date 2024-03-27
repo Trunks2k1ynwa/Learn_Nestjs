@@ -3,7 +3,7 @@ import { AppController, testController } from './app.controller';
 import { AppService } from './app.service';
 import { CatsModule } from './cats/cats.module';
 import { HumansModule } from './humans/human.module';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './guard/role.guard';
 import { CommonModule } from './common/common.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -11,15 +11,18 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import databaseConfig from './config/database.config';
 import { AccountModule } from './account/account.module';
 import { TypeOrmConfigService } from './config/database.service';
-import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
+import { CacheModule } from '@nestjs/cache-manager';
 import { BullModule } from '@nestjs/bull';
 import { AudioConsumer } from './account/consumers/audio.consumer';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { FileModule } from './file/file.module';
 @Module({
   imports: [
     CatsModule,
     HumansModule,
     CommonModule,
     AccountModule,
+    FileModule,
     CacheModule.register({
       isGlobal: true,
       ttl: 12000, // seconds
@@ -34,16 +37,6 @@ import { AudioConsumer } from './account/consumers/audio.consumer';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useClass: TypeOrmConfigService,
-      // useFactory: (configService: ConfigService) => ({
-      //   type: 'mysql',
-      //   host: configService.get('DB_HOST'),
-      //   port: configService.get('DB_PORT'),
-      //   username: configService.get('DB_USERNAME'),
-      //   password: configService.get('DB_PASSWORD'),
-      //   database: configService.get('DB_DATABASE'),
-      //   synchronize: true,
-      //   autoLoadEntities: true,
-      // }),
       inject: [ConfigService],
     }),
     //Module is use to config Queues
@@ -58,8 +51,9 @@ import { AudioConsumer } from './account/consumers/audio.consumer';
       }),
       inject: [ConfigService],
     }),
+    EventEmitterModule.forRoot(),
+    FileModule,
   ],
-
   controllers: [AppController, testController],
   providers: [
     AppService,
@@ -67,10 +61,10 @@ import { AudioConsumer } from './account/consumers/audio.consumer';
       provide: APP_GUARD,
       useClass: RolesGuard,
     },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: CacheInterceptor,
-    },
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: CacheInterceptor,
+    // },
     AudioConsumer,
   ],
 })

@@ -65,8 +65,9 @@ export class AccountController {
   async getAllAccount(
     @Res({ passthrough: true }) response: Response,
   ): Promise<{ dataFrom: string; data: Account[] }> {
-    response.cookie('token', 'asdfadsf32423432', {
-      secure: true,
+    response.cookie('token', 'Day la cookie le van trung', {
+      // secure: true,
+      httpOnly: true,
     });
     return this.accountService.getAllAccount();
   }

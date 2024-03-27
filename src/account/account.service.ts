@@ -8,6 +8,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class AccountService {
@@ -17,10 +18,15 @@ export class AccountService {
     private accountRepository: Repository<Account>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @InjectQueue('test-queue') private audioQueue: Queue,
+    private eventEmitter: EventEmitter2,
   ) {
     this.logger = new Logger(AccountService.name);
   }
   async findAllQueues() {
+    this.eventEmitter.emit('order.created', {
+      value: 'eventEmitter',
+    });
+    this.logger.error('findAllQueues');
     const accounts = await this.accountRepository.find();
     await this.audioQueue.add(
       'register',
@@ -33,6 +39,11 @@ export class AccountService {
       },
     );
     return accounts;
+  }
+  @OnEvent('order.created')
+  handleOrderCreatedEvent(payload: any) {
+    console.log('🚀 ~ payload:', payload);
+    // handle and process "OrderCreatedEvent" event
   }
   async createAccount(createAccount: CreateAccountDto) {
     const account = this.accountRepository.create(createAccount);
@@ -51,7 +62,7 @@ export class AccountService {
   }
 
   async getAllAccount(): Promise<{ dataFrom: string; data: Account[] }> {
-    this.logger.debug('logger all account');
+    this.logger.warn('logger all account');
     const cachedData: Account[] = await this.cacheManager.get('accounts_key');
     if (cachedData) {
       // Giá trị đã tồn tại trong cache
