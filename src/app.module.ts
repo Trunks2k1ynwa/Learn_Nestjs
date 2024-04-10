@@ -16,8 +16,14 @@ import { AudioConsumer } from './account/consumers/audio.consumer';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { FileModule } from './file/file.module';
 import { AuthModule } from './auth/auth.module';
-import { AuthGuard } from './guard/auth.guard';
-import { RolesGuard } from './guard/role.guard';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { join } from 'path';
+import { AccountResolver } from './graphql/resolvers/AccountResolver';
+import { GqlThrottlerGuard } from './guard/throttler.guard';
+import { GqlAuthGuard } from './guard/gqlRole.guard';
+
 @Module({
   imports: [
     CatsModule,
@@ -53,6 +59,17 @@ import { RolesGuard } from './guard/role.guard';
       }),
       inject: [ConfigService],
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 5,
+      },
+    ]),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: join(process.cwd(), 'src/graphql.gql'),
+      context: ({ req, res }) => ({ req, res }),
+    }),
     EventEmitterModule.forRoot(),
     FileModule,
     AuthModule,
@@ -60,17 +77,20 @@ import { RolesGuard } from './guard/role.guard';
   controllers: [AppController, testController],
   providers: [
     AppService,
-
     {
       provide: APP_GUARD,
-      useClass: AuthGuard,
+      useClass: GqlAuthGuard,
     },
     {
       provide: APP_GUARD,
-      useClass: RolesGuard,
+      useClass: GqlThrottlerGuard,
     },
-
+    {
+      provide: APP_GUARD,
+      useClass: GqlThrottlerGuard,
+    },
     AudioConsumer,
+    AccountResolver,
   ],
 })
 export class AppModule {}

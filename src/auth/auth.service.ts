@@ -24,7 +24,6 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
   async handleTokenAndCookie(payload, res) {
-    console.log('🚀 ~ payload:', payload);
     const access_token = this.jwtService.sign(payload, {
       secret: jwtConstants.secret,
     });

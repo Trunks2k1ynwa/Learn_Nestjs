@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import * as compression from 'compression';
+import * as csurf from 'csurf';
+import helmet from 'helmet';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn'],
@@ -14,6 +16,10 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  app.use(
+    helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }),
+  );
   app.enableCors();
   app.use(compression());
 
@@ -23,5 +29,6 @@ async function bootstrap() {
   });
   app.use(cookieParser());
   await app.listen(configService.get('PORT'));
+  app.use(csurf({ cookie: true }));
 }
 bootstrap();

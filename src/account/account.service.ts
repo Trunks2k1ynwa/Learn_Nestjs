@@ -46,6 +46,17 @@ export class AccountService {
     // handle and process "OrderCreatedEvent" event
   }
 
+  async getListAccount(): Promise<Account[]> {
+    const cachedData: Account[] = await this.cacheManager.get('accounts_key');
+    if (cachedData) {
+      // Giá trị đã tồn tại trong cache
+      return cachedData;
+    }
+    const accounts = await this.accountRepository.find();
+    await this.cacheManager.set('accounts_key', accounts, 0);
+
+    return accounts;
+  }
   async getAllAccount(): Promise<{ dataFrom: string; data: Account[] }> {
     const cachedData: Account[] = await this.cacheManager.get('accounts_key');
     if (cachedData) {

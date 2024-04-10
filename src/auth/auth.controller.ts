@@ -10,14 +10,13 @@ import {
   Post,
   Request,
   Res,
-  UseGuards,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { AuthGuard } from 'src/guard/auth.guard';
 import { Public } from 'src/utils/constants';
 import { CreateAccountDto } from 'src/account/dto/createAccount.dto';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('api/v1/auth')
 export class AuthController {
@@ -45,13 +44,12 @@ export class AuthController {
 
   //UseGuards(AuthGuard) Verify Access_token before access route below
   @UseInterceptors(ClassSerializerInterceptor)
-  @UseGuards(AuthGuard)
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Get('current-account')
   getCurrentAccount(@Request() req) {
     return this.authService.getCurrent(req.user.email);
   }
 
-  @UseGuards(AuthGuard)
   @Post('sign-out')
   signOut(@Res({ passthrough: true }) res: Response) {
     return this.authService.signOut(res);
