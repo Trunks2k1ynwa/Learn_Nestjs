@@ -18,6 +18,7 @@ import { Request, Response } from 'express';
 import { Cookies } from 'src/utils/cookies.decorator';
 import { Roles } from 'src/utils/roles.decorator';
 import { Role } from 'src/utils/role.enum';
+import { ApiBody, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 
 @Controller('api/v1/accounts')
 export class AccountController {
@@ -30,20 +31,32 @@ export class AccountController {
 
   // Update account by accountId
   @Patch(':accountId')
+  @ApiBody({ type: UpdateAccountDto })
+  @ApiTags('Account')
+  @ApiCreatedResponse({
+    description: 'The record has been successfully created.',
+    type: Account,
+  })
   updateAccount(
     @Param('accountId') accountId: number,
     @Body() updateAccount: UpdateAccountDto,
-  ) {
+  ): Promise<Account> {
     return this.accountService.updateAccount(accountId, updateAccount);
   }
 
   // Get account by accountId
   @Get(':accountId')
-  findOne(@Param('accountId') accountId: number): Promise<Account> {
+  @ApiTags('Account')
+  @ApiCreatedResponse({
+    description: 'The record has been successfully created.',
+    type: Account,
+  })
+  findAccountId(@Param('accountId') accountId: number): Promise<Account> {
     return this.accountService.findAccountById(accountId);
   }
   // Delete account by accountId
   @Delete(':accountId')
+  @ApiTags('Account')
   @Roles(Role.Admin)
   deleteOne(@Param('accountId') accountId: number, @Res() response: Response) {
     return this.accountService.deleteAccount(accountId, response);
@@ -51,12 +64,17 @@ export class AccountController {
   // Get all accounts
   // @UseGuards(RolesGuard)
   @Get()
+  @ApiTags('Account')
   @Roles(Role.Admin)
   // @CacheKey('accounts_key')
   // @CacheTTL(120)
   @UseInterceptors(ClassSerializerInterceptor)
   @SerializeOptions({
     excludePrefixes: ['_'],
+  })
+  @ApiCreatedResponse({
+    description: 'The record has been successfully created.',
+    type: Account,
   })
   async getAllAccount(
     @Res({ passthrough: true }) response: Response,

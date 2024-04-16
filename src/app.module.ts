@@ -22,7 +22,9 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { AccountResolver } from './graphql/resolvers/AccountResolver';
 import { GqlThrottlerGuard } from './guard/throttler.guard';
-import { GqlAuthGuard } from './guard/gqlRole.guard';
+import { RolesGuard } from './guard/role.guard';
+import { AuthGuard } from './guard/auth.guard';
+import { SocketModule } from './socket/socket.module';
 
 @Module({
   imports: [
@@ -73,17 +75,18 @@ import { GqlAuthGuard } from './guard/gqlRole.guard';
     EventEmitterModule.forRoot(),
     FileModule,
     AuthModule,
+    SocketModule,
   ],
   controllers: [AppController, testController],
   providers: [
     AppService,
     {
       provide: APP_GUARD,
-      useClass: GqlAuthGuard,
+      useClass: AuthGuard,
     },
     {
       provide: APP_GUARD,
-      useClass: GqlThrottlerGuard,
+      useClass: RolesGuard,
     },
     {
       provide: APP_GUARD,

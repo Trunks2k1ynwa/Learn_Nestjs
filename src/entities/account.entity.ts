@@ -19,7 +19,7 @@ export class Account {
   @Exclude({ toPlainOnly: true })
   password: string;
   @Column({ default: Role.User })
-  role: Role;
+  role?: Role;
   @Expose()
   get detailAccount(): string {
     return `${this.id} ${this.username}`;

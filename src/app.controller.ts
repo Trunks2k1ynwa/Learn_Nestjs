@@ -10,19 +10,13 @@ import {
   Redirect,
 } from '@nestjs/common';
 import { AppService } from './app.service';
-import { ConfigService } from '@nestjs/config';
 
 @Controller()
 export class AppController {
-  constructor(
-    private readonly appService: AppService,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly appService: AppService) {}
 
   @Get('hello')
   getName(): number {
-    const dbUser = this.configService.get<string>('DATABASE_USER');
-    console.log('🚀 ~ dbUser:', dbUser);
     return this.appService.getAge();
   }
   getHello(): string {
@@ -47,9 +41,7 @@ export class testController {
     console.log('userId', param.userId);
     return `user Id is: ${param.userId}`;
   }
-  findOne(@Param('id') id: number): string {
-    return `This action returns a #${id} cat`;
-  }
+
   ///////
   @Delete('delete')
   deleteCat(): void {
