@@ -10,6 +10,6 @@ import { LoggerMiddleware } from 'src/middlewares/logger.middleware';
 })
 export class HumansModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('*');
+    consumer.apply(LoggerMiddleware).forRoutes('humans');
   }
 }

@@ -1,0 +1,17 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Account {
+  id: Int
+  email: String
+  username: String
+  password: String
+  role: String
+}
+
+type Query {
+  getAccount: Account
+  getAccountId(id: Int!): Account!
+  getAllAccount: [Account!]!
+}

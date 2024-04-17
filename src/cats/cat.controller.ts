@@ -12,24 +12,36 @@ import {
   Res,
   UseInterceptors,
 } from '@nestjs/common';
-import { CreateCatDto, ListAllEntities } from './dto/create-cat.dto';
+import { CreateCatDto } from './dto/createCat.dto';
 import { Response } from 'express';
 import { CatsService } from './cat.service';
 import { Roles } from 'src/roles.decorator';
 import { LoggingInterceptor } from 'src/interceptors/logging.interceptor';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Cats } from 'src/entities/cat.entity';
 import { ConfigService } from '@nestjs/config';
-@Controller('cats')
+import {
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Public } from 'src/utils/constants';
+import { ListAllEntities } from './dto/utils';
+import { Cats } from 'src/entities/cat.entity';
+@Controller('api/v1/cats')
+@Public()
 @UseInterceptors(LoggingInterceptor)
 export class CatsController {
   constructor(
     private catsService: CatsService,
-    @InjectRepository(Cats)
-    private catsRepository: Repository<Cats>,
+
     private configService: ConfigService,
   ) {}
+  @ApiTags('Cats')
+  @ApiResponse({
+    status: 201,
+    description: 'The record has been successfully created.',
+  })
+  @ApiOperation({ description: 'You will never walk alone' })
   @Get('test-env')
   getEnvCat() {
     const test_env = this.configService.get<string>('cat.test_env');
@@ -41,17 +53,13 @@ export class CatsController {
     };
   }
 
-  @Get('get-all-cats')
-  async findAllCat() {
-    console.log('config', this.configService.get<string>('database.host'));
-    return await this.catsRepository.find();
-  }
-
+  @ApiTags('Cats')
   @Post('test-dto')
   async create(@Body() catProps: CreateCatDto) {
     return `This action adds a new cat ${catProps.number}`;
   }
 
+  @ApiTags('Cats')
   @Get('test-query')
   findAll(
     @Query() query: ListAllEntities,
@@ -62,11 +70,19 @@ export class CatsController {
     return { message: 'Response modified successfully.' };
   }
 
+  @ApiTags('Cats')
   @Get(':id')
   findOne(@Param('id') id: string, @Res() res: Response) {
     res.status(HttpStatus.CREATED).send('Create cat successfully');
     return `This action get will returns a id=${id} cat`;
   }
+  @ApiTags('Cats')
+  @Get('get-all-cats')
+  findAllCat() {
+    console.log('config', this.configService.get<string>('database.host'));
+    return this.catsService.findAllCat();
+  }
+  @ApiTags('Cats')
   @Put(':id')
   @Roles(['admin'])
   update(
@@ -83,13 +99,18 @@ export class CatsController {
     };
   }
 
+  @ApiTags('Cats')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return `This action removes a id=${id} cat`;
   }
   //CRUD
+  @ApiTags('Cats')
   @Post('create-cat')
-  createCat(@Body() catProp: CreateCatDto) {
+  @ApiCreatedResponse({
+    type: Cats,
+  })
+  createCat(@Body() catProp: CreateCatDto): Cats {
     return this.catsService.createCat(catProp);
   }
 }

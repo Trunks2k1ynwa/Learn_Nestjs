@@ -3,9 +3,7 @@ import { Humans } from 'src/humans/interfaces/human.interface';
 import { HumansService } from 'src/humans/human.service';
 import { HumanDto } from './dto/humans.dto';
 import { CatsService } from './../cats/cat.service';
-// import { InjectRepository } from '@nestjs/typeorm';
-// import { User } from 'src/user.entity';
-// import { Repository } from 'typeorm';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('humans')
 export class HumansController {
@@ -15,13 +13,13 @@ export class HumansController {
     protected catsService: CatsService,
     // private usersRepository: Repository<User>,
   ) {}
-
+  @ApiTags('Humans')
   @Post()
   async create(@Body() humanDto: HumanDto) {
     this.humansService.createHuman(humanDto);
     return 'Add human successfully';
   }
-
+  @ApiTags('Humans')
   @Get('get-all')
   async findAll(): Promise<Humans[]> {
     return this.humansService.findAllHuman();
