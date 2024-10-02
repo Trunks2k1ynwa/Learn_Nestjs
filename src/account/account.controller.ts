@@ -4,6 +4,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
+  HttpStatus,
   Param,
   Patch,
   Req,
@@ -19,6 +21,7 @@ import { Cookies } from 'src/utils/cookies.decorator';
 import { Roles } from 'src/utils/roles.decorator';
 import { Role } from 'src/utils/role.enum';
 import { ApiBody, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/utils/constants';
 
 @Controller('api/v1/accounts')
 export class AccountController {
@@ -84,5 +87,10 @@ export class AccountController {
       httpOnly: true,
     });
     return this.accountService.getAllAccount();
+  }
+  @Get('error')
+  @Public()
+  async testError() {
+    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
   }
 }

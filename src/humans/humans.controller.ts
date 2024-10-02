@@ -4,8 +4,9 @@ import { HumansService } from 'src/humans/human.service';
 import { HumanDto } from './dto/humans.dto';
 import { CatsService } from './../cats/cat.service';
 import { ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/utils/constants';
 
-@Controller('humans')
+@Controller('api/v1/humans')
 export class HumansController {
   constructor(
     // @InjectRepository(User)
@@ -20,6 +21,7 @@ export class HumansController {
     return 'Add human successfully';
   }
   @ApiTags('Humans')
+  @Public()
   @Get('get-all')
   async findAll(): Promise<Humans[]> {
     return this.humansService.findAllHuman();

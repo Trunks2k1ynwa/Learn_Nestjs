@@ -8,7 +8,7 @@ export class CommonService {
     private catsService: CatsService,
   ) {}
   protected common = [];
-  testFuncton() {
-    console.log('testFuncton', this.catsService.findAllCat());
+  testFunction() {
+    return this.catsService.findAllCat();
   }
 }

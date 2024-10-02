@@ -69,6 +69,12 @@ export class CatsController {
     res.cookie('myCookie', 'NestJS is awesome!');
     return { message: 'Response modified successfully.' };
   }
+  @ApiTags('Cats')
+  @Get('get-all-cats')
+  findAllCat() {
+    // console.log('config', this.configService.get<string>('database.host'));
+    return this.catsService.findAllCat();
+  }
 
   @ApiTags('Cats')
   @Get(':id')
@@ -76,12 +82,7 @@ export class CatsController {
     res.status(HttpStatus.CREATED).send('Create cat successfully');
     return `This action get will returns a id=${id} cat`;
   }
-  @ApiTags('Cats')
-  @Get('get-all-cats')
-  findAllCat() {
-    console.log('config', this.configService.get<string>('database.host'));
-    return this.catsService.findAllCat();
-  }
+
   @ApiTags('Cats')
   @Put(':id')
   @Roles(['admin'])

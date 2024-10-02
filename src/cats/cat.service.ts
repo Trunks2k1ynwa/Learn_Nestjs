@@ -23,6 +23,7 @@ export class CatsService {
   ];
   constructor(
     @Inject(forwardRef(() => CommonService))
+    @Inject('HTTP_OPTIONS')
     private commonService: CommonService,
     private lazyModuleLoader: LazyModuleLoader,
     @InjectRepository(Cats)
@@ -31,7 +32,7 @@ export class CatsService {
 
   updateCat(idCat: number) {
     const cat = this.listCat.find((cat) => cat.id === idCat);
-    this.commonService.testFuncton();
+    this.commonService.testFunction();
     return cat;
   }
   findAllCat(): ICatProp[] {

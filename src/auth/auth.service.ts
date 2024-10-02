@@ -38,7 +38,7 @@ export class AuthService {
     const user = await this.accountService.findAccountByUserName(username);
     if (!user) {
       throw new UnauthorizedException(
-        `Account with username doesn't exits in database`,
+        `Account with username doesn't exits in the database`,
       );
     }
     const checkMatchPassword = await bcrypt.compare(pass, user.password);
@@ -91,5 +91,16 @@ export class AuthService {
   }
   async getCurrent(email): Promise<Account> {
     return this.accountService.findAccountByEmail(email);
+  }
+
+  googleLogin(req) {
+    if (!req.user) {
+      return 'No user from google';
+    }
+
+    return {
+      message: 'User information from google',
+      user: req.user,
+    };
   }
 }

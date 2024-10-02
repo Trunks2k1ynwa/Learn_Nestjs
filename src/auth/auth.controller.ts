@@ -7,9 +7,12 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
+  Req,
   Request,
   Res,
+  UseGuards,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
@@ -18,6 +21,7 @@ import { Public } from 'src/utils/constants';
 import { CreateAccountDto } from 'src/account/dto/createAccount.dto';
 import { Throttle } from '@nestjs/throttler';
 import { ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('api/v1/auth')
 export class AuthController {
@@ -58,5 +62,30 @@ export class AuthController {
   @Post('sign-out')
   signOut(@Res({ passthrough: true }) res: Response) {
     return this.authService.signOut(res);
+  }
+
+  @Public()
+  @UseGuards(AuthGuard('google'))
+  @Get('google')
+  async googleAuth(@Req() req) {
+    console.log(req);
+  }
+
+  @Public()
+  @UseGuards(AuthGuard('google'))
+  @Get('redirect')
+  googleAuthRedirect(@Req() req) {
+    return this.authService.googleLogin(req);
+  }
+
+  @Public()
+  @Get('params/account')
+  testNoId() {
+    return 'testNoId is' + 22131;
+  }
+  @Public()
+  @Get('params/:id')
+  testId(@Param('id') id: number) {
+    return 'id is' + id;
   }
 }

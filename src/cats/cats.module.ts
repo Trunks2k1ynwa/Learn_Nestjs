@@ -1,12 +1,18 @@
-import { MiddlewareConsumer, Module, forwardRef } from '@nestjs/common';
+import {
+  DynamicModule,
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  forwardRef,
+} from '@nestjs/common';
 import { CatsController } from './cat.controller';
 import { CatsService } from './cat.service';
-import { CommonModule } from 'src/common/common.module';
 import { ConfigModule } from '@nestjs/config';
 import { Cats } from 'src/entities/cat.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import catConfig from 'src/config/cat.config';
-import { PublicMiddleware } from 'src/middlewares/public.middleware';
+import { TestMiddleware } from 'src/middlewares/test.middleware';
+import { CommonModule } from 'src/common/common.module';
 // @Global()
 @Module({
   imports: [
@@ -18,8 +24,17 @@ import { PublicMiddleware } from 'src/middlewares/public.middleware';
   providers: [CatsService],
   exports: [CatsService],
 })
-export class CatsModule {
+export class CatsModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(PublicMiddleware).forRoutes(CatsController);
+    consumer.apply(TestMiddleware).forRoutes(CatsController);
+  }
+  static forRoot(entities = [], options?): DynamicModule {
+    const providers = [];
+    return {
+      module: CatsModule,
+      global: true,
+      providers: providers,
+      exports: providers,
+    };
   }
 }

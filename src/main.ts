@@ -4,13 +4,14 @@ import { ConfigService } from '@nestjs/config';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import * as compression from 'compression';
-import * as csurf from 'csurf';
 import helmet from 'helmet';
 import {
   DocumentBuilder,
   SwaggerDocumentOptions,
   SwaggerModule,
 } from '@nestjs/swagger';
+import { logger } from './middlewares/function.middleware';
+import * as session from 'express-session';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn'],
@@ -37,18 +38,24 @@ async function bootstrap() {
     }),
   );
 
-  app.use(
-    helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }),
-  );
   app.enableCors();
-  app.use(compression());
-
   // or "app.enableVersioning()"
   app.enableVersioning({
     type: VersioningType.URI,
   });
+  app.use(
+    logger,
+    compression(),
+    helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }),
+  );
   app.use(cookieParser());
+  app.use(
+    session({
+      secret: 'natours',
+      resave: false,
+      saveUninitialized: false,
+    }),
+  );
   await app.listen(configService.get('PORT'));
-  app.use(csurf({ cookie: true }));
 }
 bootstrap();
